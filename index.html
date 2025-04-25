@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flappy Bird HTML5</title>
+  <meta name="viewport" content="width=device-width">
+  <style>
+  body{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+  }
+  #screen {
+  display: none;
+  }
+  #screen canvas{
+    margin: 0 auto;
+  }
+  #github{
+    position:absolute;
+    bottom: 5px;
+    right:5px;
+  }
+  #loading{
+    position: absolute;
+    font-family: "Verdana";
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 24px;
+    top: 50%;
+  }
+  </style>
+</head>
+<body>
+<div id="loading">Loading...</div>
+
+<!-- 👤 Username Input -->
+<div id="username-container" style="text-align:center; margin-top: 40px;">
+  <input type="text" id="username" placeholder="Enter your username" />
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- 👇 Game will load here -->
+<div id="screen"></div>
+<div id="github"></div>
+<script>
+  // Stop the game from auto-starting by hijacking FlappyBird function
+  window.FlappyBird = function () {
+    window._delayedFlappyStart = true;
+  };
+</script>
+<script src="index.min.js?v=02131824"></script>
+<script>
+  // Delay to ensure game is initialized
+  setTimeout(() => {
+    if (typeof score !== 'undefined' && typeof gameOver !== 'undefined') {
+      window._scoreRef = () => score;
+      window._gameOverRef = () => gameOver;
+    } else {
+      console.warn("Score and gameOver not found yet.");
+    }
+  }, 1000);
+</script>
+<script>
+  // Store the real FlappyBird
+  if (window._delayedFlappyStart && typeof FlappyBird === 'function') {
+    window.FlappyBirdReal = FlappyBird;
+  }
+</script>
+<script>
+  let scoreSaved = false;
+
+  setInterval(() => {
+    try {
+      const currentScore = window._scoreRef && window._scoreRef();
+      const isGameOver = window._gameOverRef && window._gameOverRef();
+
+      // console.log("Polling:", { currentScore, isGameOver });
+
+      if (isGameOver && !scoreSaved) {
+        console.log("Saving score:", currentScore);
+        saveScore(currentScore);
+        scoreSaved = true; // ✅ lock future saves
+      }
+
+      // Reset the lock when game restarts
+      if (!isGameOver) {
+        scoreSaved = false;
+      }
+    } catch (e) {
+      console.error("Error checking game state:", e);
+    }
+  }, 1000);
+</script>
+<script>
+  function startGame() {
+  const username = document.getElementById('username').value.trim();
+  if (!username || username.length < 2) {
+    alert("Please enter a valid username (at least 2 characters)");
+    return;
+  }
+
+  localStorage.setItem('username', username);
+
+  document.getElementById('username-container').style.display = 'none';
+  document.getElementById('screen').style.display = 'block';
+
+  // Wait briefly to make sure FlappyBird() is defined
+  setTimeout(() => {
+    if (typeof FlappyBird === 'function') {
+      console.log("Starting game with FlappyBird()");
+      FlappyBird();
+    } else {
+      console.error("FlappyBird function not defined.");
+    }
+  }, 200); // slight delay to let scripts finish
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  if(document.domain === 'hyspace.io'){
+    ga('create', 'UA-21699184-3', 'hyspace.io');
+    ga('send', 'pageview');
+  }
+</script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjXtwL2ts6P4lsu95VG2LD-rDDh3LDJs4",
+    authDomain: "flappyfide.firebaseapp.com",
+    projectId: "flappyfide",
+    storageBucket: "flappyfide.firebasestorage.app",
+    messagingSenderId: "213941393041",
+    appId: "1:213941393041:web:27a1435eb58845eac9d130",
+    measurementId: "G-FE3XE5VP9E"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<script>
+  async function saveScore(score) {
+  const username = localStorage.getItem('username') || 'anonymous';
+
+  try {
+    const response = await fetch("https://flappy-backend.onrender.com/submit-score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, score })
+    });
+
+    const result = await response.text();
+    console.log("✅ Score response:", result);
+  } catch (err) {
+    console.error("❌ Error submitting score:", err);
+  }
+}
+</script>
+</body> 
+</html>
