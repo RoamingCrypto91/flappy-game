@@ -76,7 +76,7 @@
       const currentScore = window._scoreRef && window._scoreRef();
       const isGameOver = window._gameOverRef && window._gameOverRef();
 
-      // console.log("Polling:", { currentScore, isGameOver });
+      console.log("Polling:", { currentScore, isGameOver });
 
       if (isGameOver && !scoreSaved) {
         console.log("Saving score:", currentScore);
