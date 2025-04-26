@@ -70,7 +70,7 @@
 </script>
 
 <script>
-  function startGame() {
+ function startGame() {
   const username = document.getElementById('username').value.trim();
   if (!username || username.length < 2) {
     alert("Please enter a valid username (at least 2 characters)");
@@ -82,13 +82,14 @@
   document.getElementById('username-container').style.display = 'none';
   document.getElementById('screen').style.display = 'block';
 
-  // Wait briefly to make sure FlappyBird() is defined
   setTimeout(() => {
     if (typeof FlappyBird === 'function') {
       console.log("Starting game with FlappyBird()");
       FlappyBird();
 
-      // ✅ EXTRA DELAY before starting polling
+      // 👇 New fix here:
+      waitForGameVariablesAndHook();
+
       setTimeout(() => {
         console.log("✅ Starting polling after game ready...");
 
