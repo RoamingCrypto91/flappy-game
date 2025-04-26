@@ -107,8 +107,6 @@
     if (typeof FlappyBird === 'function') {
       console.log("Starting game with FlappyBird()");
       FlappyBird();
-
-      // 👇 New fix here:
       waitForGameVariablesAndHook();
 
       setTimeout(() => {
@@ -126,7 +124,7 @@
             const currentScore = window._scoreRef();
             const isGameOver = window._gameOverRef();
 
-            console.log("Polling:", { currentScore, isGameOver });
+            //console.log("Polling:", { currentScore, isGameOver });
 
             if (isGameOver && !scoreSaved) {
               console.log("Saving score:", currentScore);
