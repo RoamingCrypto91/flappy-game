@@ -70,6 +70,27 @@
 </script>
 
 <script>
+  function waitForGameVariablesAndHook() {
+    let attempts = 0;
+    const maxAttempts = 10;
+  
+    const interval = setInterval(() => {
+      if (typeof score !== 'undefined' && typeof gameOver !== 'undefined') {
+        console.log("✅ Game variables found, setting up hooks.");
+        window._scoreRef = () => score;
+        window._gameOverRef = () => gameOver;
+        clearInterval(interval);
+      } else {
+        console.log("⏳ Waiting for game variables... attempt", attempts);
+        attempts++;
+        if (attempts >= maxAttempts) {
+          console.error("❌ Could not find game variables after waiting.");
+          clearInterval(interval);
+        }
+      }
+    }, 500);
+  }
+  
  function startGame() {
   const username = document.getElementById('username').value.trim();
   if (!username || username.length < 2) {
