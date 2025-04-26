@@ -88,37 +88,42 @@
       console.log("Starting game with FlappyBird()");
       FlappyBird();
 
-      // ✅ Start polling ONLY after FlappyBird() runs
-      let scoreSaved = false;
+      // ✅ EXTRA DELAY before starting polling
+      setTimeout(() => {
+        console.log("✅ Starting polling after game ready...");
 
-      setInterval(() => {
-        try {
-          if (typeof window._scoreRef !== 'function' || typeof window._gameOverRef !== 'function') {
-            console.log("Waiting for game to load...");
-            return;
+        let scoreSaved = false;
+
+        setInterval(() => {
+          try {
+            if (typeof window._scoreRef !== 'function' || typeof window._gameOverRef !== 'function') {
+              console.log("Waiting for game hooks...");
+              return;
+            }
+
+            const currentScore = window._scoreRef();
+            const isGameOver = window._gameOverRef();
+
+            console.log("Polling:", { currentScore, isGameOver });
+
+            if (isGameOver && !scoreSaved) {
+              console.log("Saving score:", currentScore);
+              saveScore(currentScore);
+              scoreSaved = true;
+            }
+
+            if (!isGameOver) {
+              scoreSaved = false;
+            }
+          } catch (e) {
+            console.error("Error during polling:", e);
           }
+        }, 1000);
 
-          const currentScore = window._scoreRef();
-          const isGameOver = window._gameOverRef();
-
-          console.log("Polling:", { currentScore, isGameOver });
-
-          if (isGameOver && !scoreSaved) {
-            console.log("Saving score:", currentScore);
-            saveScore(currentScore);
-            scoreSaved = true;
-          }
-
-          if (!isGameOver) {
-            scoreSaved = false;
-          }
-        } catch (e) {
-          console.error("Error checking game state:", e);
-        }
-      }, 1000);
+      }, 1000); // ✅ 1-second delay before polling starts
 
     } else {
-      console.error("FlappyBird function not defined.");
+      console.error("FlappyBird function not found.");
     }
   }, 200);
 }
